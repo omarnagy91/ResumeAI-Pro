@@ -1,5 +1,10 @@
-// Debug script for ResumeAI Pro
-// Run this in the browser console to check extension status
+/**
+ * Debug script for ResumeAI Pro
+ * Run this in the browser console to check extension status and diagnose issues
+ * 
+ * Usage: Copy and paste this entire file into the browser console on any job page
+ * to get detailed debugging information about the extension's functionality.
+ */
 
 console.log('=== ResumeAI Pro Debug Information ===');
 

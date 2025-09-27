@@ -1,11 +1,24 @@
 // PDF Generation utility for ResumeAI Pro
 // Handles professional PDF creation with ATS-optimized formatting
 
+/**
+ * PDF Generator utility for ResumeAI Pro
+ * Creates professional, ATS-optimized PDF resumes and cover letters
+ * @class PDFGenerator
+ */
 class PDFGenerator {
+    /**
+     * Creates a new PDFGenerator instance
+     * @constructor
+     */
     constructor() {
         this.template = this.getDefaultTemplate();
     }
 
+    /**
+     * Returns the default PDF template configuration
+     * @returns {Object} Default template settings including fonts, colors, and margins
+     */
     getDefaultTemplate() {
         return {
             fontFamily: 'Arial, sans-serif',
@@ -25,11 +38,27 @@ class PDFGenerator {
         };
     }
 
+    /**
+     * Generates a PDF from resume data and job information
+     * @param {Object} resumeData - The resume data to format
+     * @param {string} resumeData.content - The resume content
+     * @param {Object} resumeData.atsScore - ATS compatibility score
+     * @param {Object} jobData - The job information
+     * @param {string} jobData.title - Job title
+     * @param {string} jobData.company - Company name
+     * @returns {Object} PDF generation result with HTML and blob
+     */
     generatePDF(resumeData, jobData) {
         const html = this.generateHTML(resumeData, jobData);
         return this.convertToPDF(html);
     }
 
+    /**
+     * Generates HTML content for the PDF
+     * @param {Object} resumeData - The resume data to format
+     * @param {Object} jobData - The job information
+     * @returns {string} Complete HTML document with styling
+     */
     generateHTML(resumeData, jobData) {
         const { content, atsScore } = resumeData;
         const { title, company } = jobData;
@@ -214,6 +243,11 @@ class PDFGenerator {
         `;
     }
 
+    /**
+     * Extracts candidate name from resume content
+     * @param {string} content - The resume content
+     * @returns {string} The extracted name or default placeholder
+     */
     extractName(content) {
         // Extract name from resume content (first line or header)
         const lines = content.split('\n');
@@ -221,6 +255,11 @@ class PDFGenerator {
         return firstLine || 'Your Name';
     }
 
+    /**
+     * Extracts contact information from resume content using regex patterns
+     * @param {string} content - The resume content
+     * @returns {string} HTML-formatted contact information
+     */
     extractContactInfo(content) {
         // Extract contact information from resume content
         const emailMatch = content.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
@@ -371,6 +410,13 @@ class PDFGenerator {
             .replace(/•/g, '&bull;');
     }
 
+    /**
+     * Converts HTML to PDF format
+     * Currently returns HTML blob for browser-based PDF generation
+     * @param {string} html - The HTML content to convert
+     * @returns {Object} PDF result with HTML and blob
+     * @async
+     */
     async convertToPDF(html) {
         // This would integrate with a PDF generation service
         // For now, we'll return the HTML for browser-based PDF generation
@@ -380,13 +426,22 @@ class PDFGenerator {
         };
     }
 
+    /**
+     * Converts HTML string to a Blob object
+     * @param {string} html - The HTML content
+     * @returns {Blob} HTML blob for download
+     * @async
+     */
     async htmlToBlob(html) {
         const blob = new Blob([html], { type: 'text/html' });
         return blob;
     }
 }
 
-// Export for use in other modules
+/**
+ * Export PDFGenerator class for use in other modules
+ * Supports both CommonJS and browser environments
+ */
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = PDFGenerator;
 }

@@ -1,19 +1,36 @@
 // Content script for ResumeAI Pro
 // Handles job description extraction from web pages
 
+/**
+ * Job description extractor class
+ * Automatically detects and extracts job information from various job board websites
+ * @class JobDescriptionExtractor
+ */
 class JobDescriptionExtractor {
+    /**
+     * Creates a new JobDescriptionExtractor instance
+     * @constructor
+     */
     constructor() {
         this.jobData = null;
         this.isJobPage = false;
         this.init();
     }
 
+    /**
+     * Initializes the job description extractor
+     * Sets up page detection, message listeners, and page change observers
+     */
     init() {
         this.detectJobPage();
         this.setupMessageListener();
         this.observePageChanges();
     }
 
+    /**
+     * Detects if the current page is a job posting
+     * Checks for known job boards and job-related keywords
+     */
     detectJobPage() {
         const url = window.location.href;
         const hostname = window.location.hostname;
@@ -39,6 +56,11 @@ class JobDescriptionExtractor {
         }
     }
 
+    /**
+     * Detects job-related keywords in the page content
+     * Used as a fallback for unknown job boards
+     * @returns {boolean} True if job keywords are detected
+     */
     detectJobKeywords() {
         const jobKeywords = [
             'job', 'career', 'position', 'opening', 'opportunity',
@@ -56,6 +78,10 @@ class JobDescriptionExtractor {
         );
     }
 
+    /**
+     * Extracts comprehensive job data from the current page
+     * Gathers title, company, location, description, requirements, and skills
+     */
     extractJobData() {
         const jobData = {
             title: this.extractJobTitle(),
@@ -74,6 +100,10 @@ class JobDescriptionExtractor {
         }
     }
 
+    /**
+     * Extracts job title from the page using site-specific and generic selectors
+     * @returns {string|null} The extracted job title or null if not found
+     */
     extractJobTitle() {
         // LinkedIn
         if (window.location.hostname.includes('linkedin.com')) {
@@ -113,6 +143,10 @@ class JobDescriptionExtractor {
         return null;
     }
 
+    /**
+     * Extracts company name from the page using site-specific and generic selectors
+     * @returns {string|null} The extracted company name or null if not found
+     */
     extractCompany() {
         // LinkedIn
         if (window.location.hostname.includes('linkedin.com')) {
@@ -145,6 +179,10 @@ class JobDescriptionExtractor {
         return null;
     }
 
+    /**
+     * Extracts job location from the page using site-specific and generic selectors
+     * @returns {string|null} The extracted job location or null if not found
+     */
     extractLocation() {
         // LinkedIn
         if (window.location.hostname.includes('linkedin.com')) {
@@ -176,6 +214,10 @@ class JobDescriptionExtractor {
         return null;
     }
 
+    /**
+     * Extracts job description from the page using site-specific and generic selectors
+     * @returns {string|null} The cleaned job description text or null if not found
+     */
     extractJobDescription() {
         // LinkedIn
         if (window.location.hostname.includes('linkedin.com')) {
@@ -215,6 +257,10 @@ class JobDescriptionExtractor {
         return null;
     }
 
+    /**
+     * Extracts job requirements from the job description using pattern matching
+     * @returns {Array} Array of extracted requirements or empty array if none found
+     */
     extractRequirements() {
         const description = this.extractJobDescription();
         if (!description) return [];
@@ -237,6 +283,10 @@ class JobDescriptionExtractor {
         return requirements;
     }
 
+    /**
+     * Extracts skills from job description by matching against common skills list
+     * @returns {Array} Array of detected skills or empty array if none found
+     */
     extractSkills() {
         const description = this.extractJobDescription();
         if (!description) return [];
@@ -261,6 +311,11 @@ class JobDescriptionExtractor {
         return foundSkills;
     }
 
+    /**
+     * Cleans extracted text by normalizing whitespace and line breaks
+     * @param {string} text - The text to clean
+     * @returns {string} The cleaned text
+     */
     cleanText(text) {
         return text
             .replace(/\s+/g, ' ')
@@ -268,6 +323,12 @@ class JobDescriptionExtractor {
             .trim();
     }
 
+    /**
+     * Validates if extracted text is a valid job title
+     * Filters out navigation elements and non-job related text
+     * @param {string} title - The title text to validate
+     * @returns {boolean} True if the title appears to be a valid job title
+     */
     isValidJobTitle(title) {
         if (!title || title.length < 3) return false;
 
@@ -280,6 +341,10 @@ class JobDescriptionExtractor {
         return !invalidTitles.some(invalid => lowerTitle.includes(invalid));
     }
 
+    /**
+     * Observes page changes for single-page applications
+     * Detects when content changes dynamically and re-scans for job data
+     */
     observePageChanges() {
         // Watch for dynamic content changes (SPA navigation)
         const observer = new MutationObserver((mutations) => {
@@ -304,6 +369,10 @@ class JobDescriptionExtractor {
         });
     }
 
+    /**
+     * Sets up message listener for communication with extension background script
+     * Responds to requests for job data from the sidebar or popup
+     */
     setupMessageListener() {
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (request.action === 'getJobData') {
@@ -315,6 +384,11 @@ class JobDescriptionExtractor {
         });
     }
 
+    /**
+     * Notifies the background script when job data is detected
+     * Sends extracted job information to be processed and stored
+     * @param {Object} jobData - The extracted job data object
+     */
     notifyBackground(jobData) {
         chrome.runtime.sendMessage({
             action: 'jobDetected',
@@ -323,5 +397,8 @@ class JobDescriptionExtractor {
     }
 }
 
-// Initialize the job description extractor
+/**
+ * Initialize the job description extractor
+ * Creates the content script instance to detect and extract job information
+ */
 const jobExtractor = new JobDescriptionExtractor();

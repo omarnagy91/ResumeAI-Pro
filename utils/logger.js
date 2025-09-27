@@ -1,7 +1,16 @@
 // Logger utility for ResumeAI Pro
 // Provides comprehensive logging and error tracking
 
+/**
+ * Advanced logger utility for ResumeAI Pro
+ * Provides comprehensive logging, error tracking, and performance monitoring
+ * @class Logger
+ */
 class Logger {
+    /**
+     * Creates a new Logger instance
+     * @constructor
+     */
     constructor() {
         this.logLevel = 'info'; // debug, info, warn, error
         this.maxLogs = 1000;
@@ -9,6 +18,10 @@ class Logger {
         this.init();
     }
 
+    /**
+     * Initializes the logger
+     * Loads log level from storage and sets up global error handlers
+     */
     init() {
         // Load log level from storage
         chrome.storage.local.get(['logLevel']).then(result => {
@@ -25,22 +38,48 @@ class Logger {
         });
     }
 
+    /**
+     * Logs a debug message
+     * @param {string} message - The debug message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     debug(message, data = null) {
         this.log('debug', message, data);
     }
 
+    /**
+     * Logs an info message
+     * @param {string} message - The info message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     info(message, data = null) {
         this.log('info', message, data);
     }
 
+    /**
+     * Logs a warning message
+     * @param {string} message - The warning message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     warn(message, data = null) {
         this.log('warn', message, data);
     }
 
+    /**
+     * Logs an error message
+     * @param {string} message - The error message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     error(message, data = null) {
         this.log('error', message, data);
     }
 
+    /**
+     * Internal logging method that formats, stores, and outputs log messages
+     * @param {string} level - The log level (debug, info, warn, error)
+     * @param {string} message - The message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     log(level, message, data = null) {
         const timestamp = new Date().toISOString();
         const logEntry = {
@@ -75,6 +114,11 @@ class Logger {
         }
     }
 
+    /**
+     * Determines if a message should be logged based on current log level
+     * @param {string} level - The log level to check
+     * @returns {boolean} True if the message should be logged
+     */
     shouldLog(level) {
         const levels = ['debug', 'info', 'warn', 'error'];
         const currentLevelIndex = levels.indexOf(this.logLevel);
@@ -82,6 +126,11 @@ class Logger {
         return messageLevelIndex >= currentLevelIndex;
     }
 
+    /**
+     * Gets the appropriate console method for a log level
+     * @param {string} level - The log level
+     * @returns {string} The console method name
+     */
     getConsoleMethod(level) {
         switch (level) {
             case 'debug': return 'debug';
@@ -109,6 +158,13 @@ class Logger {
         }
     }
 
+    /**
+     * Retrieves logged messages with optional filtering
+     * @param {string} [level=null] - Optional level filter (debug, info, warn, error)
+     * @param {number} [limit=100] - Maximum number of logs to return
+     * @returns {Array} Array of log entries
+     * @async
+     */
     async getLogs(level = null, limit = 100) {
         let filteredLogs = this.logs;
 
@@ -156,6 +212,14 @@ class Logger {
     }
 
     // API call logging
+    /**
+     * Logs API call information with performance metrics
+     * @param {string} endpoint - The API endpoint that was called
+     * @param {string} method - The HTTP method used (GET, POST, etc.)
+     * @param {number} status - The HTTP status code returned
+     * @param {number} duration - The duration of the API call in milliseconds
+     * @param {Error} [error=null] - Optional error object if the call failed
+     */
     logApiCall(endpoint, method, status, duration, error = null) {
         const logData = {
             endpoint,
@@ -173,7 +237,10 @@ class Logger {
     }
 }
 
-// Export for use in other modules
+/**
+ * Export Logger class for use in other modules
+ * Supports both CommonJS and browser environments
+ */
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = Logger;
 }

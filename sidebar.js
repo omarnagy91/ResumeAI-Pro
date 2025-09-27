@@ -1,8 +1,16 @@
 // Sidebar script for ResumeAI Pro
 // Handles sidebar UI interactions and communication with background script
 
-// Simple logger implementation for sidebar
+/**
+ * Simple logger implementation for sidebar
+ * Provides logging functionality for the sidebar interface
+ * @class Logger
+ */
 class Logger {
+    /**
+     * Creates a new Logger instance
+     * @constructor
+     */
     constructor() {
         this.logLevel = 'info';
     }
@@ -35,7 +43,16 @@ class Logger {
     }
 }
 
+/**
+ * Main sidebar class for ResumeAI Pro
+ * Manages the sidebar interface, job detection, and resume/cover letter generation
+ * @class ResumeAIProSidebar
+ */
 class ResumeAIProSidebar {
+    /**
+     * Creates a new ResumeAIProSidebar instance
+     * @constructor
+     */
     constructor() {
         this.currentJob = null;
         this.currentResume = null;
@@ -45,6 +62,11 @@ class ResumeAIProSidebar {
         this.init();
     }
 
+    /**
+     * Initializes the sidebar interface
+     * Loads settings, sets up event listeners, and checks the current page for job data
+     * @async
+     */
     async init() {
         try {
             await this.loadSettings();
@@ -95,6 +117,11 @@ class ResumeAIProSidebar {
         document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
     }
 
+    /**
+     * Checks the current page for job data
+     * Communicates with content script to detect and extract job information
+     * @async
+     */
     async checkCurrentPage() {
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -527,7 +554,10 @@ class ResumeAIProSidebar {
     }
 }
 
-// Initialize the sidebar when DOM is loaded
+/**
+ * Initialize the sidebar when DOM is loaded
+ * Creates the main sidebar instance and sets up the interface
+ */
 document.addEventListener('DOMContentLoaded', () => {
     new ResumeAIProSidebar();
 });

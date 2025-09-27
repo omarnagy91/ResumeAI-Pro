@@ -1,28 +1,62 @@
 // Background script for ResumeAI Pro
 // Handles API communication, data processing, and storage
 
-// Simple logger implementation for service worker
+/**
+ * Simple logger implementation for service worker
+ * Provides structured logging with different levels and API call tracking
+ * @class Logger
+ */
 class Logger {
+    /**
+     * Creates a new Logger instance
+     * @constructor
+     */
     constructor() {
         this.logLevel = 'info';
     }
 
+    /**
+     * Logs a debug message
+     * @param {string} message - The debug message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     debug(message, data = null) {
         this.log('debug', message, data);
     }
 
+    /**
+     * Logs an info message
+     * @param {string} message - The info message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     info(message, data = null) {
         this.log('info', message, data);
     }
 
+    /**
+     * Logs a warning message
+     * @param {string} message - The warning message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     warn(message, data = null) {
         this.log('warn', message, data);
     }
 
+    /**
+     * Logs an error message
+     * @param {string} message - The error message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     error(message, data = null) {
         this.log('error', message, data);
     }
 
+    /**
+     * Internal logging method that formats and outputs log messages
+     * @param {string} level - The log level (debug, info, warn, error)
+     * @param {string} message - The message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     log(level, message, data = null) {
         const timestamp = new Date().toISOString();
         const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
@@ -34,6 +68,14 @@ class Logger {
         }
     }
 
+    /**
+     * Logs API call information with performance metrics
+     * @param {string} endpoint - The API endpoint that was called
+     * @param {string} method - The HTTP method used (GET, POST, etc.)
+     * @param {number} status - The HTTP status code returned
+     * @param {number} duration - The duration of the API call in milliseconds
+     * @param {Error} [error=null] - Optional error object if the call failed
+     */
     logApiCall(endpoint, method, status, duration, error = null) {
         const logData = {
             endpoint,
@@ -51,7 +93,16 @@ class Logger {
     }
 }
 
+/**
+ * Main background service class for ResumeAI Pro
+ * Handles all background operations including API communication, data processing, and storage management
+ * @class ResumeAIProBackground
+ */
 class ResumeAIProBackground {
+    /**
+     * Creates a new ResumeAIProBackground instance
+     * @constructor
+     */
     constructor() {
         this.apiKey = null;
         this.userProfile = null;
@@ -60,6 +111,11 @@ class ResumeAIProBackground {
         this.init();
     }
 
+    /**
+     * Initializes the background service
+     * Loads settings, sets up message listeners, alarms, and side panel
+     * @async
+     */
     async init() {
         try {
             await this.loadSettings();
@@ -72,6 +128,11 @@ class ResumeAIProBackground {
         }
     }
 
+    /**
+     * Loads settings from Chrome storage
+     * Falls back to default settings if none exist or if loading fails
+     * @async
+     */
     async loadSettings() {
         try {
             const result = await chrome.storage.local.get(['settings']);
@@ -88,6 +149,10 @@ class ResumeAIProBackground {
         }
     }
 
+    /**
+     * Returns the default settings configuration
+     * @returns {Object} Default settings object with all configuration options
+     */
     getDefaultSettings() {
         return {
             api: {
@@ -135,6 +200,10 @@ class ResumeAIProBackground {
         };
     }
 
+    /**
+     * Sets up the message listener for communication with content scripts and popup
+     * Handles all incoming messages from other parts of the extension
+     */
     setupMessageListener() {
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             this.handleMessage(request, sender, sendResponse);
@@ -142,6 +211,15 @@ class ResumeAIProBackground {
         });
     }
 
+    /**
+     * Handles incoming messages from content scripts and popup
+     * Routes messages to appropriate handler methods based on action type
+     * @param {Object} request - The message request object
+     * @param {string} request.action - The action to perform
+     * @param {Object} sender - Information about the sender
+     * @param {Function} sendResponse - Callback function to send response
+     * @async
+     */
     async handleMessage(request, sender, sendResponse) {
         try {
             this.logger.debug('Handling message:', request.action);
@@ -211,6 +289,16 @@ class ResumeAIProBackground {
         }
     }
 
+    /**
+     * Handles job detection from content script
+     * Stores job data and updates extension badge
+     * @param {Object} jobData - The detected job information
+     * @param {string} jobData.title - Job title
+     * @param {string} jobData.company - Company name
+     * @param {string} jobData.location - Job location
+     * @param {string} jobData.description - Job description
+     * @async
+     */
     async handleJobDetected(jobData) {
         // Store the detected job data
         await chrome.storage.local.set({
@@ -225,6 +313,23 @@ class ResumeAIProBackground {
         }
     }
 
+    /**
+     * Generates an optimized resume for the given job data
+     * Performs job analysis, resume optimization, ATS scoring, and consistency verification
+     * @param {Object} jobData - The job information to optimize for
+     * @param {string} jobData.title - Job title
+     * @param {string} jobData.company - Company name
+     * @param {string} jobData.description - Job description
+     * @returns {Object} Generated resume with scores and metadata
+     * @returns {string} returns.content - The optimized resume content
+     * @returns {Object} returns.atsScore - ATS compatibility score and recommendations
+     * @returns {number} returns.consistencyScore - Storyline consistency score
+     * @returns {Object} returns.jobAnalysis - Analysis of job requirements
+     * @returns {string} returns.timestamp - Generation timestamp
+     * @returns {string} returns.version - Resume version
+     * @async
+     * @throws {Error} When API key or user profile is not configured
+     */
     async generateResume(jobData) {
         if (!this.apiKey) {
             throw new Error('OpenAI API key not configured');
@@ -265,6 +370,23 @@ class ResumeAIProBackground {
         }
     }
 
+    /**
+     * Generates a personalized cover letter for the given job data
+     * Creates a compelling cover letter and calculates match score
+     * @param {Object} jobData - The job information to write cover letter for
+     * @param {string} jobData.title - Job title
+     * @param {string} jobData.company - Company name
+     * @param {string} jobData.description - Job description
+     * @param {string} [customInstructions=''] - Custom instructions for cover letter generation
+     * @returns {Object} Generated cover letter with scores and metadata
+     * @returns {string} returns.content - The generated cover letter content
+     * @returns {Object} returns.matchScore - Match score against job requirements
+     * @returns {string} returns.customInstructions - Custom instructions used
+     * @returns {string} returns.timestamp - Generation timestamp
+     * @returns {string} returns.version - Cover letter version
+     * @async
+     * @throws {Error} When API key or user profile is not configured
+     */
     async generateCoverLetter(jobData, customInstructions = '') {
         if (!this.apiKey) {
             throw new Error('OpenAI API key not configured');
@@ -295,6 +417,24 @@ class ResumeAIProBackground {
         }
     }
 
+    /**
+     * Analyzes job requirements and extracts key information
+     * Uses AI to parse job description and identify requirements, skills, and qualifications
+     * @param {Object} jobData - The job information to analyze
+     * @param {string} jobData.title - Job title
+     * @param {string} jobData.company - Company name
+     * @param {string} jobData.location - Job location
+     * @param {string} jobData.description - Job description
+     * @returns {Object} Structured analysis of job requirements
+     * @returns {Array} returns.requiredSkills - List of required technical and soft skills
+     * @returns {Array} returns.preferredQualifications - List of preferred qualifications
+     * @returns {Array} returns.keyResponsibilities - List of key responsibilities
+     * @returns {Array} returns.industryKeywords - List of industry-specific keywords
+     * @returns {Array} returns.companyCulture - Company culture indicators
+     * @returns {string} returns.experienceLevel - Required experience level
+     * @returns {Array} returns.educationRequirements - Education requirements
+     * @async
+     */
     async analyzeJobRequirements(jobData) {
         const prompt = `
         Analyze the following job description and extract key requirements, skills, and qualifications:
@@ -322,6 +462,14 @@ class ResumeAIProBackground {
         return JSON.parse(response);
     }
 
+    /**
+     * Optimizes resume content based on job analysis
+     * Uses AI to tailor resume content for specific job requirements
+     * @param {Object} jobAnalysis - The analyzed job requirements
+     * @param {Object} jobData - The original job data
+     * @returns {string} The optimized resume content
+     * @async
+     */
     async optimizeResume(jobAnalysis, jobData) {
         const baseResume = this.buildBaseResume();
         const systemPrompt = this.settings.prompts?.resumeSystemPrompt || 'You are ResumeAI Pro, an expert resume optimization assistant.';
@@ -335,6 +483,14 @@ class ResumeAIProBackground {
         return await this.callOpenAI(prompt, this.settings.api?.model || 'gpt-5', systemPrompt);
     }
 
+    /**
+     * Creates a personalized cover letter using AI
+     * Generates compelling cover letter content based on user profile and job data
+     * @param {Object} jobData - The job information
+     * @param {string} customInstructions - Custom instructions for cover letter generation
+     * @returns {string} The generated cover letter content
+     * @async
+     */
     async createCoverLetter(jobData, customInstructions) {
         const userProfile = this.buildUserProfile();
         const systemPrompt = this.settings.prompts?.coverLetterSystemPrompt || 'You are ResumeAI Pro, an expert cover letter writer.';
@@ -348,6 +504,11 @@ class ResumeAIProBackground {
         return await this.callOpenAI(prompt, this.settings.api?.model || 'gpt-5', systemPrompt);
     }
 
+    /**
+     * Builds base resume content from user profile data
+     * Formats user profile information into a structured resume format
+     * @returns {string} The formatted base resume content
+     */
     buildBaseResume() {
         const profile = this.userProfile;
         let resume = '';
@@ -425,10 +586,25 @@ class ResumeAIProBackground {
         return resume;
     }
 
+    /**
+     * Builds user profile data as JSON string
+     * @returns {string} JSON string representation of user profile
+     */
     buildUserProfile() {
         return JSON.stringify(this.userProfile, null, 2);
     }
 
+    /**
+     * Calculates ATS compatibility score for resume against job requirements
+     * Uses AI to evaluate resume optimization and provide recommendations
+     * @param {string} resume - The resume content to score
+     * @param {Object} jobData - The job data to compare against
+     * @param {string} jobData.description - Job description
+     * @returns {Object} ATS score and recommendations
+     * @returns {number} returns.score - ATS compatibility score (0-100)
+     * @returns {Array} returns.recommendations - List of improvement recommendations
+     * @async
+     */
     async calculateATSScore(resume, jobData) {
         const prompt = `
         Calculate an ATS compatibility score for this resume against the job requirements:
@@ -479,6 +655,16 @@ class ResumeAIProBackground {
         return JSON.parse(response);
     }
 
+    /**
+     * Makes API call to OpenAI Chat Completions endpoint
+     * Handles authentication, request formatting, and error handling
+     * @param {string} prompt - The user prompt to send to OpenAI
+     * @param {string} [model='gpt-5'] - The OpenAI model to use
+     * @param {string} [systemPrompt=null] - Optional system prompt
+     * @returns {string} The AI-generated response content
+     * @async
+     * @throws {Error} When API key is not configured or API call fails
+     */
     async callOpenAI(prompt, model = 'gpt-5', systemPrompt = null) {
         if (!this.apiKey) {
             throw new Error('OpenAI API key not configured');
@@ -534,6 +720,17 @@ class ResumeAIProBackground {
         }
     }
 
+    /**
+     * Tests API connection with provided credentials
+     * Validates API key and model availability
+     * @param {string} apiKey - The OpenAI API key to test
+     * @param {string} model - The model to test with
+     * @returns {Object} Test result with success status and message
+     * @returns {boolean} returns.success - Whether the test was successful
+     * @returns {string} returns.message - Success message
+     * @returns {string} returns.error - Error message if test failed
+     * @async
+     */
     async testApiConnection(apiKey, model) {
         try {
             const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -565,6 +762,14 @@ class ResumeAIProBackground {
         }
     }
 
+    /**
+     * Gets current settings for the extension
+     * Returns a subset of settings relevant to the UI
+     * @returns {Object} Current settings object
+     * @returns {string} returns.apiKey - Current API key (masked)
+     * @returns {Object} returns.userProfile - User profile data
+     * @returns {string} returns.optimizationLevel - Current optimization level
+     */
     async getSettings() {
         return {
             apiKey: this.settings.api?.apiKey || '',
@@ -573,6 +778,13 @@ class ResumeAIProBackground {
         };
     }
 
+    /**
+     * Saves all settings to Chrome storage
+     * Updates internal state with new settings
+     * @param {Object} settings - The complete settings object to save
+     * @async
+     * @throws {Error} When saving to storage fails
+     */
     async saveAllSettings(settings) {
         try {
             await chrome.storage.local.set({ settings: settings });
@@ -586,6 +798,14 @@ class ResumeAIProBackground {
         }
     }
 
+    /**
+     * Saves custom instructions for resume and cover letter generation
+     * @param {Object} instructions - Custom instructions object
+     * @param {string} instructions.coverLetter - Cover letter custom instructions
+     * @param {string} instructions.resume - Resume custom instructions
+     * @async
+     * @throws {Error} When saving to storage fails
+     */
     async saveCustomInstructions(instructions) {
         try {
             if (!this.settings.customInstructions) {
@@ -600,7 +820,15 @@ class ResumeAIProBackground {
         }
     }
 
-    async downloadPDF(resumeData) {
+    /**
+     * Downloads resume or cover letter as PDF
+     * Generates professional PDF using PDFGenerator utility
+     * @param {Object} resumeData - The resume or cover letter data to download
+     * @param {string} resumeData.content - The content to include in PDF
+     * @param {string} [type='resume'] - The type of document (resume or cover-letter)
+     * @async
+     */
+    async downloadPDF(resumeData, type = 'resume') {
         try {
             // Import PDF generator
             const { PDFGenerator } = await import('./utils/pdfGenerator.js');
@@ -615,7 +843,7 @@ class ResumeAIProBackground {
 
             // Create download
             const url = URL.createObjectURL(pdfResult.blob);
-            const filename = `resume_${jobData.title?.replace(/[^a-zA-Z0-9]/g, '_') || 'optimized'}_${Date.now()}.html`;
+            const filename = `${type}_${jobData.title?.replace(/[^a-zA-Z0-9]/g, '_') || 'optimized'}_${Date.now()}.html`;
 
             // Trigger download
             if (chrome.downloads && chrome.downloads.download) {
@@ -644,14 +872,14 @@ class ResumeAIProBackground {
             if (chrome.downloads && chrome.downloads.download) {
                 chrome.downloads.download({
                     url: url,
-                    filename: `resume_${Date.now()}.txt`,
+                    filename: `${type}_${Date.now()}.txt`,
                     saveAs: true
                 });
             } else {
                 // Fallback: create a simple download link
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `resume_${Date.now()}.txt`;
+                a.download = `${type}_${Date.now()}.txt`;
                 a.click();
             }
 
@@ -659,6 +887,10 @@ class ResumeAIProBackground {
         }
     }
 
+    /**
+     * Sets up side panel functionality
+     * Configures extension icon click handler to open side panel
+     */
     setupSidePanel() {
         // Set up side panel when extension icon is clicked
         if (chrome.action && chrome.action.onClicked) {
@@ -680,6 +912,10 @@ class ResumeAIProBackground {
         }
     }
 
+    /**
+     * Sets up periodic alarms for maintenance tasks
+     * Creates cleanup alarm that runs every hour
+     */
     setupAlarms() {
         // Set up periodic cleanup of old data
         if (chrome.alarms && chrome.alarms.create) {
@@ -693,6 +929,11 @@ class ResumeAIProBackground {
         }
     }
 
+    /**
+     * Cleans up old job data based on retention settings
+     * Removes job data older than the configured retention period
+     * @async
+     */
     async cleanupOldData() {
         try {
             const result = await chrome.storage.local.get(['lastJobDetection']);
@@ -716,6 +957,16 @@ class ResumeAIProBackground {
         }
     }
 
+    /**
+     * Calculates match score for cover letter against job requirements
+     * Uses AI to evaluate how well the cover letter addresses job needs
+     * @param {string} coverLetter - The cover letter content to evaluate
+     * @param {Object} jobData - The job data to match against
+     * @param {string} jobData.description - Job description
+     * @returns {Object} Match score object
+     * @returns {number} returns.score - Match score (0-100)
+     * @async
+     */
     async calculateCoverLetterMatch(coverLetter, jobData) {
         const prompt = `
         Calculate a match score for this cover letter against the job requirements:
@@ -741,6 +992,15 @@ class ResumeAIProBackground {
         return JSON.parse(response);
     }
 
+    /**
+     * Verifies storyline consistency between base and optimized resume
+     * Ensures optimization doesn't introduce contradictions or inaccuracies
+     * @param {string} optimizedResume - The optimized resume content to verify
+     * @returns {Object} Consistency check results
+     * @returns {number} returns.score - Consistency score (0-100)
+     * @returns {Array} returns.contradictions - List of potential contradictions found
+     * @async
+     */
     async verifyStorylineConsistency(optimizedResume) {
         const baseResume = this.buildBaseResume();
         const prompt = `
@@ -767,6 +1027,11 @@ class ResumeAIProBackground {
         return JSON.parse(response);
     }
 
+    /**
+     * Returns the default resume optimization user prompt template
+     * Contains placeholders for dynamic content insertion
+     * @returns {string} Default resume user prompt template
+     */
     getDefaultResumeUserPrompt() {
         return `Optimize the following resume for the job requirements while maintaining authenticity and consistency:
 
@@ -789,6 +1054,11 @@ Please optimize the resume by:
 Return only the optimized resume content, maintaining professional formatting.`;
     }
 
+    /**
+     * Returns the default cover letter generation user prompt template
+     * Contains placeholders for dynamic content insertion
+     * @returns {string} Default cover letter user prompt template
+     */
     getDefaultCoverLetterUserPrompt() {
         return `Write a compelling cover letter for this position:
 
@@ -812,5 +1082,8 @@ Return only the cover letter content.`;
     }
 }
 
-// Initialize the background service
+/**
+ * Initialize the background service
+ * Creates the main ResumeAI Pro background service instance
+ */
 const resumeAIPro = new ResumeAIProBackground();

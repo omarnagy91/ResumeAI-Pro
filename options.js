@@ -1,28 +1,62 @@
 // Options page script for ResumeAI Pro
 // Handles settings management and user profile configuration
 
-// Simple logger implementation for options page
+/**
+ * Simple logger implementation for options page
+ * Provides logging functionality for the options page interface
+ * @class Logger
+ */
 class Logger {
+    /**
+     * Creates a new Logger instance
+     * @constructor
+     */
     constructor() {
         this.logLevel = 'info';
     }
 
+    /**
+     * Logs a debug message
+     * @param {string} message - The debug message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     debug(message, data = null) {
         this.log('debug', message, data);
     }
 
+    /**
+     * Logs an info message
+     * @param {string} message - The info message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     info(message, data = null) {
         this.log('info', message, data);
     }
 
+    /**
+     * Logs a warning message
+     * @param {string} message - The warning message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     warn(message, data = null) {
         this.log('warn', message, data);
     }
 
+    /**
+     * Logs an error message
+     * @param {string} message - The error message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     error(message, data = null) {
         this.log('error', message, data);
     }
 
+    /**
+     * Internal logging method that formats and outputs log messages
+     * @param {string} level - The log level (debug, info, warn, error)
+     * @param {string} message - The message to log
+     * @param {Object} [data=null] - Optional data object to include with the message
+     */
     log(level, message, data = null) {
         const timestamp = new Date().toISOString();
         const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
@@ -35,7 +69,16 @@ class Logger {
     }
 }
 
+/**
+ * Main options page class for ResumeAI Pro
+ * Handles all settings management, user interface interactions, and form validation
+ * @class ResumeAIProOptions
+ */
 class ResumeAIProOptions {
+    /**
+     * Creates a new ResumeAIProOptions instance
+     * @constructor
+     */
     constructor() {
         this.currentTab = 'api';
         this.settings = {};
@@ -43,6 +86,11 @@ class ResumeAIProOptions {
         this.init();
     }
 
+    /**
+     * Initializes the options page
+     * Loads settings, sets up UI, and populates forms
+     * @async
+     */
     async init() {
         try {
             await this.loadSettings();
@@ -56,6 +104,11 @@ class ResumeAIProOptions {
         }
     }
 
+    /**
+     * Loads settings from background script
+     * Falls back to default settings if loading fails
+     * @async
+     */
     async loadSettings() {
         try {
             const response = await this.sendMessage({ action: 'getAllSettings' });
@@ -70,6 +123,10 @@ class ResumeAIProOptions {
         }
     }
 
+    /**
+     * Returns the default settings configuration for the options page
+     * @returns {Object} Default settings object with all configuration options
+     */
     getDefaultSettings() {
         return {
             api: {
@@ -516,6 +573,11 @@ Format as JSON: {"score": number, "recommendations": ["item1", "item2"]}`;
         }
     }
 
+    /**
+     * Saves all settings to storage
+     * Collects form data and sends to background script for storage
+     * @async
+     */
     async saveAllSettings() {
         try {
             const settings = this.collectFormData();
@@ -748,6 +810,13 @@ Format as JSON: {"score": number, "recommendations": ["item1", "item2"]}`;
         }, 3000);
     }
 
+    /**
+     * Sends message to background script
+     * Wraps Chrome extension messaging API in a Promise
+     * @param {Object} message - The message to send
+     * @returns {Promise} Promise that resolves with the response
+     * @async
+     */
     async sendMessage(message) {
         return new Promise((resolve, reject) => {
             chrome.runtime.sendMessage(message, (response) => {
@@ -761,7 +830,10 @@ Format as JSON: {"score": number, "recommendations": ["item1", "item2"]}`;
     }
 }
 
-// Initialize the options page when DOM is loaded
+/**
+ * Initialize the options page when DOM is loaded
+ * Creates the main options page instance and sets up the interface
+ */
 document.addEventListener('DOMContentLoaded', () => {
     new ResumeAIProOptions();
 });
