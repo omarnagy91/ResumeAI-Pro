@@ -131,7 +131,7 @@ class ResumeAIProOptions {
         return {
             api: {
                 apiKey: '',
-                model: 'gpt-5',
+                model: 'gpt-4o',
                 temperature: 0.3,
                 maxTokens: 2000
             },

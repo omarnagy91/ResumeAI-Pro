@@ -157,7 +157,7 @@ class ResumeAIProBackground {
         return {
             api: {
                 apiKey: '',
-                model: 'gpt-5',
+                model: 'gpt-4o',
                 temperature: 0.3,
                 maxTokens: 2000
             },
@@ -480,7 +480,7 @@ class ResumeAIProBackground {
             .replace('{jobAnalysis}', JSON.stringify(jobAnalysis, null, 2))
             .replace('{optimizationLevel}', this.settings.parameters?.optimizationLevel || 'balanced');
 
-        return await this.callOpenAI(prompt, this.settings.api?.model || 'gpt-5', systemPrompt);
+        return await this.callOpenAI(prompt, this.settings.api?.model || 'gpt-4o', systemPrompt);
     }
 
     /**
@@ -501,7 +501,7 @@ class ResumeAIProBackground {
             .replace('{jobData}', JSON.stringify(jobData, null, 2))
             .replace('{customInstructions}', customInstructions);
 
-        return await this.callOpenAI(prompt, this.settings.api?.model || 'gpt-5', systemPrompt);
+        return await this.callOpenAI(prompt, this.settings.api?.model || 'gpt-4o', systemPrompt);
     }
 
     /**
@@ -665,7 +665,7 @@ class ResumeAIProBackground {
      * @async
      * @throws {Error} When API key is not configured or API call fails
      */
-    async callOpenAI(prompt, model = 'gpt-5', systemPrompt = null) {
+    async callOpenAI(prompt, model = 'gpt-4o', systemPrompt = null) {
         if (!this.apiKey) {
             throw new Error('OpenAI API key not configured');
         }
@@ -696,7 +696,7 @@ class ResumeAIProBackground {
                 body: JSON.stringify({
                     model: model,
                     messages: messages,
-                    max_tokens: this.settings.api?.maxTokens || 2000,
+                    max_completion_tokens: this.settings.api?.maxTokens || 2000,
                     temperature: this.settings.api?.temperature || 0.3
                 })
             });
@@ -747,7 +747,7 @@ class ResumeAIProBackground {
                             content: 'Test connection'
                         }
                     ],
-                    max_tokens: 10
+                    max_completion_tokens: 10
                 })
             });
 
@@ -988,7 +988,7 @@ class ResumeAIProBackground {
         Format as JSON: {"score": number}
         `;
 
-        const response = await this.callOpenAI(prompt, this.settings.api?.model || 'gpt-5');
+        const response = await this.callOpenAI(prompt, this.settings.api?.model || 'gpt-4o');
         return JSON.parse(response);
     }
 
@@ -1023,7 +1023,7 @@ class ResumeAIProBackground {
         Format as JSON: {"score": number, "contradictions": ["item1", "item2"]}
         `;
 
-        const response = await this.callOpenAI(prompt, this.settings.api?.model || 'gpt-5');
+        const response = await this.callOpenAI(prompt, this.settings.api?.model || 'gpt-4o');
         return JSON.parse(response);
     }
 

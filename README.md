@@ -9,7 +9,7 @@ ResumeAI Pro is a sophisticated Chrome extension that leverages AI to automatica
 ## Key Features
 
 - **🤖 Intelligent Job Description Parser**: Automatically extracts job requirements from any job board
-- **📝 GPT-5 Resume Optimization**: AI-powered resume customization for each application
+- **📝 GPT-4o Resume Optimization**: AI-powered resume customization for each application
 - **💌 Cover Letter Generation**: Create compelling, personalized cover letters with custom instructions
 - **📊 ATS Compatibility Scoring**: Ensures 95%+ ATS compatibility with real-time scoring
 - **🔒 Storyline Consistency**: Maintains authenticity across all resume versions
