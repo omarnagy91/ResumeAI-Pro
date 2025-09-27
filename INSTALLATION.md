@@ -73,25 +73,53 @@
 
 ### Common Issues
 
+#### "Service worker registration failed"
+- **Cause**: Extension background script has errors
+- **Solution**: 
+  1. Open Chrome DevTools (F12)
+  2. Go to Extensions tab
+  3. Click "Inspect views: background page"
+  4. Check console for errors
+  5. Reload the extension
+
+#### "Could not establish connection. Receiving end does not exist"
+- **Cause**: Content script not loaded on the page
+- **Solution**:
+  1. Refresh the current page
+  2. Navigate to a different page and back
+  3. Check that the extension is enabled
+  4. Try disabling and re-enabling the extension
+
 #### "No job detected"
 - Ensure you're on a job posting page
 - Try refreshing the page
 - Check that the extension is enabled
+- Verify the page has loaded completely
 
 #### "API key not configured"
 - Go to Settings and enter your OpenAI API key
 - Ensure the key starts with `sk-`
 - Verify you have GPT-4 access
+- Test the API connection in settings
 
-#### "Base resume not configured"
-- Go to Settings and paste your resume template
-- Ensure it's at least 100 characters long
-- Include your name, experience, and skills
+#### "User profile not configured"
+- Go to Settings → User Profile tab
+- Fill in your personal information
+- Add at least one work experience
+- Include your skills and education
 
 #### "Error generating resume"
 - Check your internet connection
 - Verify your API key is valid
 - Ensure you have sufficient OpenAI credits
+- Check the console for detailed error messages
+
+#### "Side panel not opening"
+- **Cause**: Chrome version doesn't support side panels
+- **Solution**: 
+  1. Update Chrome to latest version
+  2. Extension will fallback to opening options page
+  3. Use the options page to configure settings
 
 ### Performance Tips
 - Use a well-formatted base resume template

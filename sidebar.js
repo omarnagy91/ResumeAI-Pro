@@ -1,6 +1,40 @@
 // Sidebar script for ResumeAI Pro
 // Handles sidebar UI interactions and communication with background script
 
+// Simple logger implementation for sidebar
+class Logger {
+    constructor() {
+        this.logLevel = 'info';
+    }
+
+    debug(message, data = null) {
+        this.log('debug', message, data);
+    }
+
+    info(message, data = null) {
+        this.log('info', message, data);
+    }
+
+    warn(message, data = null) {
+        this.log('warn', message, data);
+    }
+
+    error(message, data = null) {
+        this.log('error', message, data);
+    }
+
+    log(level, message, data = null) {
+        const timestamp = new Date().toISOString();
+        const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+
+        if (data) {
+            console[level] || console.log(logMessage, data);
+        } else {
+            console[level] || console.log(logMessage);
+        }
+    }
+}
+
 class ResumeAIProSidebar {
     constructor() {
         this.currentJob = null;
@@ -65,6 +99,11 @@ class ResumeAIProSidebar {
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
+            if (!tab || !tab.id) {
+                this.updateJobStatus('error', 'No active tab', 'Please navigate to a job posting');
+                return;
+            }
+
             // Send message to content script to check for job data
             const response = await chrome.tabs.sendMessage(tab.id, { action: 'getJobData' });
 
@@ -79,7 +118,11 @@ class ResumeAIProSidebar {
             }
         } catch (error) {
             this.logger.error('Error checking current page:', error);
-            this.updateJobStatus('error', 'Error scanning page', 'Please refresh and try again');
+            if (error.message.includes('Could not establish connection')) {
+                this.updateJobStatus('error', 'Page not ready', 'Please refresh the page and try again');
+            } else {
+                this.updateJobStatus('error', 'Error scanning page', 'Please refresh and try again');
+            }
         }
     }
 

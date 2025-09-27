@@ -1,6 +1,40 @@
 // Options page script for ResumeAI Pro
 // Handles settings management and user profile configuration
 
+// Simple logger implementation for options page
+class Logger {
+    constructor() {
+        this.logLevel = 'info';
+    }
+
+    debug(message, data = null) {
+        this.log('debug', message, data);
+    }
+
+    info(message, data = null) {
+        this.log('info', message, data);
+    }
+
+    warn(message, data = null) {
+        this.log('warn', message, data);
+    }
+
+    error(message, data = null) {
+        this.log('error', message, data);
+    }
+
+    log(level, message, data = null) {
+        const timestamp = new Date().toISOString();
+        const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+
+        if (data) {
+            console[level] || console.log(logMessage, data);
+        } else {
+            console[level] || console.log(logMessage);
+        }
+    }
+}
+
 class ResumeAIProOptions {
     constructor() {
         this.currentTab = 'api';

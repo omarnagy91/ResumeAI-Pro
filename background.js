@@ -1,6 +1,56 @@
 // Background script for ResumeAI Pro
 // Handles API communication, data processing, and storage
 
+// Simple logger implementation for service worker
+class Logger {
+    constructor() {
+        this.logLevel = 'info';
+    }
+
+    debug(message, data = null) {
+        this.log('debug', message, data);
+    }
+
+    info(message, data = null) {
+        this.log('info', message, data);
+    }
+
+    warn(message, data = null) {
+        this.log('warn', message, data);
+    }
+
+    error(message, data = null) {
+        this.log('error', message, data);
+    }
+
+    log(level, message, data = null) {
+        const timestamp = new Date().toISOString();
+        const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+
+        if (data) {
+            console[level] || console.log(logMessage, data);
+        } else {
+            console[level] || console.log(logMessage);
+        }
+    }
+
+    logApiCall(endpoint, method, status, duration, error = null) {
+        const logData = {
+            endpoint,
+            method,
+            status,
+            duration: `${duration}ms`,
+            error: error ? error.message : null
+        };
+
+        if (error || status >= 400) {
+            this.error(`API call failed: ${method} ${endpoint}`, logData);
+        } else {
+            this.info(`API call: ${method} ${endpoint}`, logData);
+        }
+    }
+}
+
 class ResumeAIProBackground {
     constructor() {
         this.apiKey = null;
@@ -169,8 +219,10 @@ class ResumeAIProBackground {
         });
 
         // Update badge to show job detected
-        chrome.action.setBadgeText({ text: '!' });
-        chrome.action.setBadgeBackgroundColor({ color: '#28a745' });
+        if (chrome.action && chrome.action.setBadgeText) {
+            chrome.action.setBadgeText({ text: '!' });
+            chrome.action.setBadgeBackgroundColor({ color: '#28a745' });
+        }
     }
 
     async generateResume(jobData) {
@@ -566,11 +618,19 @@ class ResumeAIProBackground {
             const filename = `resume_${jobData.title?.replace(/[^a-zA-Z0-9]/g, '_') || 'optimized'}_${Date.now()}.html`;
 
             // Trigger download
-            chrome.downloads.download({
-                url: url,
-                filename: filename,
-                saveAs: true
-            });
+            if (chrome.downloads && chrome.downloads.download) {
+                chrome.downloads.download({
+                    url: url,
+                    filename: filename,
+                    saveAs: true
+                });
+            } else {
+                // Fallback: create a simple download link
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+            }
 
             // Clean up
             setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -581,11 +641,19 @@ class ResumeAIProBackground {
             const blob = new Blob([resumeData.content], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
 
-            chrome.downloads.download({
-                url: url,
-                filename: `resume_${Date.now()}.txt`,
-                saveAs: true
-            });
+            if (chrome.downloads && chrome.downloads.download) {
+                chrome.downloads.download({
+                    url: url,
+                    filename: `resume_${Date.now()}.txt`,
+                    saveAs: true
+                });
+            } else {
+                // Fallback: create a simple download link
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `resume_${Date.now()}.txt`;
+                a.click();
+            }
 
             setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
@@ -593,25 +661,36 @@ class ResumeAIProBackground {
 
     setupSidePanel() {
         // Set up side panel when extension icon is clicked
-        chrome.action.onClicked.addListener(async (tab) => {
-            try {
-                await chrome.sidePanel.open({ tabId: tab.id });
-                this.logger.info('Side panel opened for tab:', tab.id);
-            } catch (error) {
-                this.logger.error('Error opening side panel:', error);
-            }
-        });
+        if (chrome.action && chrome.action.onClicked) {
+            chrome.action.onClicked.addListener(async (tab) => {
+                try {
+                    if (chrome.sidePanel && chrome.sidePanel.open) {
+                        await chrome.sidePanel.open({ tabId: tab.id });
+                        this.logger.info('Side panel opened for tab:', tab.id);
+                    } else {
+                        // Fallback: open options page if side panel not available
+                        chrome.runtime.openOptionsPage();
+                    }
+                } catch (error) {
+                    this.logger.error('Error opening side panel:', error);
+                    // Fallback: open options page
+                    chrome.runtime.openOptionsPage();
+                }
+            });
+        }
     }
 
     setupAlarms() {
         // Set up periodic cleanup of old data
-        chrome.alarms.create('cleanup', { periodInMinutes: 60 });
+        if (chrome.alarms && chrome.alarms.create) {
+            chrome.alarms.create('cleanup', { periodInMinutes: 60 });
 
-        chrome.alarms.onAlarm.addListener((alarm) => {
-            if (alarm.name === 'cleanup') {
-                this.cleanupOldData();
-            }
-        });
+            chrome.alarms.onAlarm.addListener((alarm) => {
+                if (alarm.name === 'cleanup') {
+                    this.cleanupOldData();
+                }
+            });
+        }
     }
 
     async cleanupOldData() {
@@ -626,7 +705,9 @@ class ResumeAIProBackground {
                 const retentionDays = this.settings.advanced?.dataRetention || 30;
                 if (hoursDiff > (retentionDays * 24)) {
                     await chrome.storage.local.remove(['currentJob', 'lastJobDetection']);
-                    chrome.action.setBadgeText({ text: '' });
+                    if (chrome.action && chrome.action.setBadgeText) {
+                        chrome.action.setBadgeText({ text: '' });
+                    }
                     this.logger.info('Cleaned up old job data');
                 }
             }
