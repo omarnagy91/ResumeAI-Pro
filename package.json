@@ -1,0 +1,32 @@
+{
+  "name": "resumeai-pro",
+  "version": "1.0.0",
+  "description": "AI-Powered Chrome Extension for Dynamic Resume Customization",
+  "main": "background.js",
+  "scripts": {
+    "build": "echo 'Chrome extension - no build step required'",
+    "test": "echo 'Tests not implemented yet'",
+    "lint": "echo 'Linting not configured yet'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "resume",
+    "ai",
+    "job-application",
+    "ats-optimization",
+    "openai",
+    "gpt-5"
+  ],
+  "author": "ResumeAI Pro Team",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/resumeai-pro.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/resumeai-pro/issues"
+  },
+  "homepage": "https://github.com/your-username/resumeai-pro#readme"
+}

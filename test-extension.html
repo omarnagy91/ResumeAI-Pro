@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResumeAI Pro - Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .job-posting {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .job-title {
+            color: #2c5aa0;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .company-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .job-location {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .job-description {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #2c5aa0;
+        }
+        .requirements {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        .skills {
+            background: #f3e5f5;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>ResumeAI Pro - Test Job Posting</h1>
+    <p>This is a test page to demonstrate ResumeAI Pro's job description extraction capabilities.</p>
+
+    <div class="job-posting">
+        <h1 class="job-title">Senior Software Engineer</h1>
+        <div class="company-name">TechCorp Solutions</div>
+        <div class="job-location">San Francisco, CA (Remote)</div>
+        
+        <div class="job-description">
+            <h3>Job Description</h3>
+            <p>We are seeking a highly skilled Senior Software Engineer to join our dynamic team. The ideal candidate will have extensive experience in full-stack development and a passion for creating innovative solutions.</p>
+            
+            <div class="requirements">
+                <h4>Requirements:</h4>
+                <ul>
+                    <li>Bachelor's degree in Computer Science or related field</li>
+                    <li>5+ years of software development experience</li>
+                    <li>Proficiency in JavaScript, Python, and React</li>
+                    <li>Experience with cloud platforms (AWS, Azure)</li>
+                    <li>Strong problem-solving and communication skills</li>
+                    <li>Experience with Agile development methodologies</li>
+                </ul>
+            </div>
+            
+            <div class="skills">
+                <h4>Preferred Skills:</h4>
+                <ul>
+                    <li>Node.js, Express, Django, Flask</li>
+                    <li>SQL, MongoDB, PostgreSQL</li>
+                    <li>Docker, Kubernetes</li>
+                    <li>Machine Learning, AI</li>
+                    <li>Git, CI/CD pipelines</li>
+                </ul>
+            </div>
+            
+            <h4>Responsibilities:</h4>
+            <ul>
+                <li>Design and develop scalable web applications</li>
+                <li>Collaborate with cross-functional teams</li>
+                <li>Mentor junior developers</li>
+                <li>Participate in code reviews and technical discussions</li>
+                <li>Contribute to architectural decisions</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="job-posting">
+        <h1 class="job-title">Data Scientist</h1>
+        <div class="company-name">Analytics Inc</div>
+        <div class="job-location">New York, NY</div>
+        
+        <div class="job-description">
+            <h3>Job Description</h3>
+            <p>Join our data science team to build machine learning models and drive data-driven insights for our growing business.</p>
+            
+            <div class="requirements">
+                <h4>Requirements:</h4>
+                <ul>
+                    <li>Master's degree in Data Science, Statistics, or related field</li>
+                    <li>3+ years of experience in data science</li>
+                    <li>Proficiency in Python, R, and SQL</li>
+                    <li>Experience with machine learning frameworks (TensorFlow, PyTorch)</li>
+                    <li>Strong statistical analysis skills</li>
+                </ul>
+            </div>
+            
+            <div class="skills">
+                <h4>Technical Skills:</h4>
+                <ul>
+                    <li>Pandas, NumPy, Scikit-learn</li>
+                    <li>Jupyter Notebooks, Tableau</li>
+                    <li>Apache Spark, Hadoop</li>
+                    <li>Deep Learning, NLP</li>
+                    <li>A/B Testing, Experimentation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate job board environment
+        console.log('Test page loaded - ResumeAI Pro should detect job postings');
+        
+        // Add some dynamic content to test the mutation observer
+        setTimeout(() => {
+            const newJob = document.createElement('div');
+            newJob.className = 'job-posting';
+            newJob.innerHTML = `
+                <h1 class="job-title">Product Manager</h1>
+                <div class="company-name">StartupXYZ</div>
+                <div class="job-location">Austin, TX</div>
+                <div class="job-description">
+                    <h3>Job Description</h3>
+                    <p>We're looking for a Product Manager to drive our product strategy and work with engineering teams.</p>
+                    <div class="requirements">
+                        <h4>Requirements:</h4>
+                        <ul>
+                            <li>Bachelor's degree in Business, Engineering, or related field</li>
+                            <li>3+ years of product management experience</li>
+                            <li>Strong analytical and communication skills</li>
+                            <li>Experience with Agile methodologies</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(newJob);
+        }, 3000);
+    </script>
+</body>
+</html>

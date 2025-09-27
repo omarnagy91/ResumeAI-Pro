@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResumeAI Pro - Settings</title>
+    <link rel="stylesheet" href="styles/options.css">
+</head>
+<body>
+    <div class="options-container">
+        <header class="options-header">
+            <div class="header-content">
+                <h1>ResumeAI Pro Settings</h1>
+                <p>Configure your AI-powered resume optimization experience</p>
+            </div>
+        </header>
+
+        <main class="options-main">
+            <nav class="options-nav">
+                <button class="nav-item active" data-tab="api">API Configuration</button>
+                <button class="nav-item" data-tab="profile">User Profile</button>
+                <button class="nav-item" data-tab="prompts">Prompts & Parameters</button>
+                <button class="nav-item" data-tab="advanced">Advanced Settings</button>
+            </nav>
+
+            <div class="options-content">
+                <!-- API Configuration Tab -->
+                <div id="api-tab" class="tab-content active">
+                    <div class="section">
+                        <h2>OpenAI API Configuration</h2>
+                        <div class="form-group">
+                            <label for="api-key">API Key</label>
+                            <div class="input-group">
+                                <input type="password" id="api-key" placeholder="Enter your OpenAI API key (sk-...)" />
+                                <button id="toggle-api-key" class="btn-icon" title="Show/Hide">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                </button>
+                            </div>
+                            <small>Your API key is stored locally and never shared. Get your key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a></small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="api-model">Default Model</label>
+                            <select id="api-model">
+                                <option value="gpt-5">GPT-5 (Recommended)</option>
+                                <option value="gpt-4">GPT-4</option>
+                                <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="api-temperature">Temperature</label>
+                            <input type="range" id="api-temperature" min="0" max="1" step="0.1" value="0.3" />
+                            <div class="range-labels">
+                                <span>Conservative (0.0)</span>
+                                <span id="temperature-value">0.3</span>
+                                <span>Creative (1.0)</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="max-tokens">Max Tokens</label>
+                            <input type="number" id="max-tokens" min="500" max="4000" value="2000" />
+                            <small>Maximum tokens for API responses (affects cost and response length)</small>
+                        </div>
+
+                        <div class="api-test">
+                            <button id="test-api" class="btn btn-primary">Test API Connection</button>
+                            <div id="api-test-result" class="test-result"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Profile Tab -->
+                <div id="profile-tab" class="tab-content">
+                    <div class="section">
+                        <h2>Personal Information</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="full-name">Full Name</label>
+                                <input type="text" id="full-name" placeholder="Your full name" />
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" placeholder="your.email@example.com" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phone">Phone</label>
+                                <input type="tel" id="phone" placeholder="+1 (555) 123-4567" />
+                            </div>
+                            <div class="form-group">
+                                <label for="location">Location</label>
+                                <input type="text" id="location" placeholder="City, State/Country" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="linkedin">LinkedIn Profile</label>
+                            <input type="url" id="linkedin" placeholder="https://linkedin.com/in/yourprofile" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="portfolio">Portfolio/Website</label>
+                            <input type="url" id="portfolio" placeholder="https://yourportfolio.com" />
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>Professional Summary</h2>
+                        <div class="form-group">
+                            <label for="professional-summary">Summary</label>
+                            <textarea id="professional-summary" placeholder="Write a brief professional summary that highlights your key strengths and career objectives..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>Work Experience</h2>
+                        <div id="experience-list" class="experience-list">
+                            <!-- Experience items will be added here -->
+                        </div>
+                        <button id="add-experience" class="btn btn-secondary">Add Experience</button>
+                    </div>
+
+                    <div class="section">
+                        <h2>Education</h2>
+                        <div id="education-list" class="education-list">
+                            <!-- Education items will be added here -->
+                        </div>
+                        <button id="add-education" class="btn btn-secondary">Add Education</button>
+                    </div>
+
+                    <div class="section">
+                        <h2>Skills</h2>
+                        <div class="form-group">
+                            <label for="technical-skills">Technical Skills</label>
+                            <textarea id="technical-skills" placeholder="List your technical skills separated by commas (e.g., JavaScript, Python, React, AWS)"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="soft-skills">Soft Skills</label>
+                            <textarea id="soft-skills" placeholder="List your soft skills separated by commas (e.g., Leadership, Communication, Problem Solving)"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>Certifications</h2>
+                        <div id="certifications-list" class="certifications-list">
+                            <!-- Certifications will be added here -->
+                        </div>
+                        <button id="add-certification" class="btn btn-secondary">Add Certification</button>
+                    </div>
+                </div>
+
+                <!-- Prompts & Parameters Tab -->
+                <div id="prompts-tab" class="tab-content">
+                    <div class="section">
+                        <h2>Resume Generation Prompts</h2>
+                        <div class="form-group">
+                            <label for="resume-system-prompt">System Prompt for Resume Generation</label>
+                            <textarea id="resume-system-prompt" placeholder="Customize the system prompt for resume generation..."></textarea>
+                            <small>This prompt defines how the AI should behave when generating resumes</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="resume-user-prompt">User Prompt Template</label>
+                            <textarea id="resume-user-prompt" placeholder="Customize the user prompt template for resume generation..."></textarea>
+                            <small>Use placeholders: {baseResume}, {jobAnalysis}, {optimizationLevel}</small>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>Cover Letter Generation Prompts</h2>
+                        <div class="form-group">
+                            <label for="cover-letter-system-prompt">System Prompt for Cover Letter Generation</label>
+                            <textarea id="cover-letter-system-prompt" placeholder="Customize the system prompt for cover letter generation..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cover-letter-user-prompt">User Prompt Template</label>
+                            <textarea id="cover-letter-user-prompt" placeholder="Customize the user prompt template for cover letter generation..."></textarea>
+                            <small>Use placeholders: {userProfile}, {jobData}, {customInstructions}</small>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>ATS Scoring Prompts</h2>
+                        <div class="form-group">
+                            <label for="ats-scoring-prompt">ATS Scoring Prompt</label>
+                            <textarea id="ats-scoring-prompt" placeholder="Customize the ATS scoring prompt..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>Optimization Parameters</h2>
+                        <div class="form-group">
+                            <label for="keyword-density">Keyword Density Target</label>
+                            <input type="range" id="keyword-density" min="1" max="5" step="1" value="3" />
+                            <div class="range-labels">
+                                <span>Low (1)</span>
+                                <span id="keyword-density-value">3</span>
+                                <span>High (5)</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="optimization-level">Default Optimization Level</label>
+                            <select id="optimization-level">
+                                <option value="conservative">Conservative</option>
+                                <option value="balanced" selected>Balanced</option>
+                                <option value="aggressive">Aggressive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Settings Tab -->
+                <div id="advanced-tab" class="tab-content">
+                    <div class="section">
+                        <h2>Generation Settings</h2>
+                        <div class="form-group">
+                            <label for="auto-generate">Auto-generate on job detection</label>
+                            <input type="checkbox" id="auto-generate" />
+                            <small>Automatically start resume generation when a job is detected</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="include-cover-letter">Always offer cover letter generation</label>
+                            <input type="checkbox" id="include-cover-letter" checked />
+                            <small>Show cover letter generation option for every job</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="storyline-verification">Enable storyline consistency verification</label>
+                            <input type="checkbox" id="storyline-verification" checked />
+                            <small>Verify that generated content maintains consistency with your base resume</small>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>Data & Privacy</h2>
+                        <div class="form-group">
+                            <label for="data-retention">Data retention period (days)</label>
+                            <input type="number" id="data-retention" min="1" max="365" value="30" />
+                            <small>How long to keep generated resumes and job data</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="analytics">Enable usage analytics</label>
+                            <input type="checkbox" id="analytics" />
+                            <small>Help improve ResumeAI Pro by sharing anonymous usage data</small>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>Backup & Export</h2>
+                        <div class="form-group">
+                            <button id="export-settings" class="btn btn-secondary">Export Settings</button>
+                            <button id="import-settings" class="btn btn-secondary">Import Settings</button>
+                            <input type="file" id="import-file" accept=".json" style="display: none;" />
+                        </div>
+
+                        <div class="form-group">
+                            <button id="reset-settings" class="btn btn-danger">Reset All Settings</button>
+                            <small>This will reset all settings to default values</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="options-footer">
+            <div class="footer-actions">
+                <button id="save-settings" class="btn btn-primary">Save All Settings</button>
+                <button id="cancel-settings" class="btn btn-secondary">Cancel</button>
+            </div>
+            <div class="footer-info">
+                <span id="last-saved"></span>
+                <span id="settings-version">v1.0.0</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Experience Item Template -->
+    <template id="experience-template">
+        <div class="experience-item">
+            <div class="item-header">
+                <h4>Work Experience</h4>
+                <button class="remove-item" title="Remove">×</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Job Title</label>
+                    <input type="text" class="job-title" placeholder="Software Engineer" />
+                </div>
+                <div class="form-group">
+                    <label>Company</label>
+                    <input type="text" class="company" placeholder="Tech Corp" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="month" class="start-date" />
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="month" class="end-date" />
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="current-job" /> Current Position
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Location</label>
+                <input type="text" class="location" placeholder="San Francisco, CA" />
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea class="description" placeholder="Describe your key responsibilities and achievements..."></textarea>
+            </div>
+        </div>
+    </template>
+
+    <!-- Education Item Template -->
+    <template id="education-template">
+        <div class="education-item">
+            <div class="item-header">
+                <h4>Education</h4>
+                <button class="remove-item" title="Remove">×</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Degree</label>
+                    <input type="text" class="degree" placeholder="Bachelor of Science" />
+                </div>
+                <div class="form-group">
+                    <label>Field of Study</label>
+                    <input type="text" class="field" placeholder="Computer Science" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Institution</label>
+                    <input type="text" class="institution" placeholder="University Name" />
+                </div>
+                <div class="form-group">
+                    <label>Graduation Date</label>
+                    <input type="month" class="graduation-date" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>GPA (Optional)</label>
+                <input type="text" class="gpa" placeholder="3.8" />
+            </div>
+        </div>
+    </template>
+
+    <!-- Certification Item Template -->
+    <template id="certification-template">
+        <div class="certification-item">
+            <div class="item-header">
+                <h4>Certification</h4>
+                <button class="remove-item" title="Remove">×</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Certification Name</label>
+                    <input type="text" class="cert-name" placeholder="AWS Certified Solutions Architect" />
+                </div>
+                <div class="form-group">
+                    <label>Issuing Organization</label>
+                    <input type="text" class="issuer" placeholder="Amazon Web Services" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Issue Date</label>
+                    <input type="month" class="issue-date" />
+                </div>
+                <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="month" class="expiry-date" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Credential ID (Optional)</label>
+                <input type="text" class="credential-id" placeholder="ABC123456" />
+            </div>
+        </div>
+    </template>
+
+    <script src="options.js"></script>
+</body>
+</html>
