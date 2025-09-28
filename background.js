@@ -136,11 +136,16 @@ class ResumeAIProBackground {
     async loadSettings() {
         try {
             const result = await chrome.storage.local.get(['settings']);
+            this.logger.debug('Settings loaded from storage:', result);
+
             if (result.settings) {
                 this.settings = result.settings;
                 this.apiKey = this.settings.api?.apiKey || null;
                 this.userProfile = this.settings.userProfile || null;
+                this.logger.debug('User profile loaded:', !!this.userProfile);
+                this.logger.debug('API key loaded:', !!this.apiKey);
             } else {
+                this.logger.warn('No settings found in storage, using defaults');
                 this.settings = this.getDefaultSettings();
             }
         } catch (error) {
@@ -279,6 +284,11 @@ class ResumeAIProBackground {
                     sendResponse({ success: true });
                     break;
 
+                case 'importSettings':
+                    const result = await this.importSettings(request.settings);
+                    sendResponse(result);
+                    break;
+
                 default:
                     this.logger.warn('Unknown action:', request.action);
                     sendResponse({ success: false, error: 'Unknown action' });
@@ -331,12 +341,25 @@ class ResumeAIProBackground {
      * @throws {Error} When API key or user profile is not configured
      */
     async generateResume(jobData) {
+        this.logger.debug('Starting resume generation with current state:');
+        this.logger.debug('API key available:', !!this.apiKey);
+        this.logger.debug('User profile available:', !!this.userProfile);
+        this.logger.debug('Settings available:', !!this.settings);
+
         if (!this.apiKey) {
-            throw new Error('OpenAI API key not configured');
+            this.logger.error('API key not configured, attempting to reload settings');
+            await this.loadSettings();
+            if (!this.apiKey) {
+                throw new Error('OpenAI API key not configured');
+            }
         }
 
         if (!this.userProfile) {
-            throw new Error('User profile not configured');
+            this.logger.error('User profile not configured, attempting to reload settings');
+            await this.loadSettings();
+            if (!this.userProfile) {
+                throw new Error('User profile not configured');
+            }
         }
 
         try {
@@ -459,7 +482,7 @@ class ResumeAIProBackground {
         `;
 
         const response = await this.callOpenAI(prompt, 'gpt-4');
-        return JSON.parse(response);
+        return response;
     }
 
     /**
@@ -471,7 +494,20 @@ class ResumeAIProBackground {
      * @async
      */
     async optimizeResume(jobAnalysis, jobData) {
+        // Debug: Check if user profile is loaded
+        this.logger.debug('User profile loaded:', !!this.userProfile);
+        this.logger.debug('Settings loaded:', !!this.settings);
+
+        if (!this.userProfile) {
+            this.logger.error('User profile not loaded, attempting to reload settings');
+            await this.loadSettings();
+        }
+
         const baseResume = this.buildBaseResume();
+        this.logger.debug('Base resume length:', baseResume.length);
+        this.logger.debug('Base resume preview:', baseResume.substring(0, 200) + '...');
+        this.logger.debug('Job analysis:', jobAnalysis);
+
         const systemPrompt = this.settings.prompts?.resumeSystemPrompt || 'You are ResumeAI Pro, an expert resume optimization assistant.';
         const userPrompt = this.settings.prompts?.resumeUserPrompt || this.getDefaultResumeUserPrompt();
 
@@ -479,6 +515,9 @@ class ResumeAIProBackground {
             .replace('{baseResume}', baseResume)
             .replace('{jobAnalysis}', JSON.stringify(jobAnalysis, null, 2))
             .replace('{optimizationLevel}', this.settings.parameters?.optimizationLevel || 'balanced');
+
+        this.logger.debug('Final prompt length:', prompt.length);
+        this.logger.debug('Final prompt preview:', prompt.substring(0, 500) + '...');
 
         return await this.callOpenAI(prompt, this.settings.api?.model || 'gpt-4o', systemPrompt);
     }
@@ -511,6 +550,13 @@ class ResumeAIProBackground {
      */
     buildBaseResume() {
         const profile = this.userProfile;
+        this.logger.debug('Building base resume with profile:', profile);
+
+        if (!profile) {
+            this.logger.error('No user profile available for building base resume');
+            return 'No user profile available. Please configure your profile in the options page.';
+        }
+
         let resume = '';
 
         // Personal Information
@@ -627,7 +673,7 @@ class ResumeAIProBackground {
         `;
 
         const response = await this.callOpenAI(prompt, 'gpt-4');
-        return JSON.parse(response);
+        return response;
     }
 
     async verifyStorylineConsistency(optimizedResume, baseResume) {
@@ -652,7 +698,7 @@ class ResumeAIProBackground {
         `;
 
         const response = await this.callOpenAI(prompt, 'gpt-4');
-        return JSON.parse(response);
+        return response;
     }
 
     /**
@@ -712,7 +758,16 @@ class ResumeAIProBackground {
             const data = await response.json();
             this.logger.logApiCall('/v1/chat/completions', 'POST', response.status, duration);
 
-            return data.choices[0].message.content;
+            // Handle both JSON and text responses
+            const content = data.choices[0].message.content;
+
+            // Try to parse as JSON first, fall back to text if it fails
+            try {
+                return JSON.parse(content);
+            } catch (parseError) {
+                // If it's not JSON, return the content as-is
+                return content;
+            }
         } catch (error) {
             const duration = Date.now() - startTime;
             this.logger.logApiCall('/v1/chat/completions', 'POST', 0, duration, error);
@@ -816,6 +871,35 @@ class ResumeAIProBackground {
             this.logger.info('Custom instructions saved');
         } catch (error) {
             this.logger.error('Error saving custom instructions:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Imports settings from a JSON object
+     * @param {Object} settingsData - The settings data to import
+     * @async
+     * @throws {Error} When importing fails
+     */
+    async importSettings(settingsData) {
+        try {
+            // Validate the settings data
+            if (!settingsData || typeof settingsData !== 'object') {
+                throw new Error('Invalid settings data');
+            }
+
+            // Save to storage
+            await chrome.storage.local.set({ settings: settingsData });
+
+            // Update internal state
+            this.settings = settingsData;
+            this.apiKey = settingsData.api?.apiKey || null;
+            this.userProfile = settingsData.userProfile || null;
+
+            this.logger.info('Settings imported successfully');
+            return { success: true, message: 'Settings imported successfully' };
+        } catch (error) {
+            this.logger.error('Error importing settings:', error);
             throw error;
         }
     }
@@ -989,7 +1073,7 @@ class ResumeAIProBackground {
         `;
 
         const response = await this.callOpenAI(prompt, this.settings.api?.model || 'gpt-4o');
-        return JSON.parse(response);
+        return response;
     }
 
     /**
@@ -1024,7 +1108,7 @@ class ResumeAIProBackground {
         `;
 
         const response = await this.callOpenAI(prompt, this.settings.api?.model || 'gpt-4o');
-        return JSON.parse(response);
+        return response;
     }
 
     /**

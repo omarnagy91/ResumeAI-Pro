@@ -94,9 +94,25 @@ class JobDescriptionExtractor {
             timestamp: new Date().toISOString()
         };
 
+        // Debug logging
+        console.log('ResumeAI Pro - Extracted job data:', {
+            title: jobData.title,
+            company: jobData.company,
+            location: jobData.location,
+            descriptionLength: jobData.description ? jobData.description.length : 0,
+            hasDescription: !!jobData.description
+        });
+
         if (jobData.title && jobData.description) {
             this.jobData = jobData;
             this.notifyBackground(jobData);
+        } else {
+            console.log('ResumeAI Pro - Job data incomplete:', {
+                hasTitle: !!jobData.title,
+                hasDescription: !!jobData.description,
+                title: jobData.title,
+                descriptionPreview: jobData.description ? jobData.description.substring(0, 100) + '...' : 'No description'
+            });
         }
     }
 
@@ -107,8 +123,21 @@ class JobDescriptionExtractor {
     extractJobTitle() {
         // LinkedIn
         if (window.location.hostname.includes('linkedin.com')) {
-            const title = document.querySelector('h1.job-title, .job-details-jobs-unified-top-card__job-title, h1[data-test-id="job-title"]');
-            return title ? title.textContent.trim() : null;
+            const selectors = [
+                '.job-details-jobs-unified-top-card__job-title h1',
+                '.job-details-jobs-unified-top-card__job-title',
+                'h1.job-title',
+                'h1[data-test-id="job-title"]',
+                '.t-24.job-details-jobs-unified-top-card__job-title'
+            ];
+
+            for (const selector of selectors) {
+                const title = document.querySelector(selector);
+                if (title && this.isValidJobTitle(title.textContent)) {
+                    return title.textContent.trim();
+                }
+            }
+            return null;
         }
 
         // Indeed
@@ -150,8 +179,20 @@ class JobDescriptionExtractor {
     extractCompany() {
         // LinkedIn
         if (window.location.hostname.includes('linkedin.com')) {
-            const company = document.querySelector('.job-details-jobs-unified-top-card__company-name, .job-details-jobs-unified-top-card__primary-description-without-tagline a');
-            return company ? company.textContent.trim() : null;
+            const selectors = [
+                '.job-details-jobs-unified-top-card__company-name a',
+                '.job-details-jobs-unified-top-card__company-name',
+                '.job-details-jobs-unified-top-card__primary-description-without-tagline a',
+                '.artdeco-entity-lockup__title a'
+            ];
+
+            for (const selector of selectors) {
+                const company = document.querySelector(selector);
+                if (company && company.textContent.trim().length > 0) {
+                    return company.textContent.trim();
+                }
+            }
+            return null;
         }
 
         // Indeed
@@ -186,8 +227,24 @@ class JobDescriptionExtractor {
     extractLocation() {
         // LinkedIn
         if (window.location.hostname.includes('linkedin.com')) {
-            const location = document.querySelector('.job-details-jobs-unified-top-card__bullet, .job-details-jobs-unified-top-card__primary-description-without-tagline span');
-            return location ? location.textContent.trim() : null;
+            const selectors = [
+                '.job-details-jobs-unified-top-card__tertiary-description-container span',
+                '.job-details-jobs-unified-top-card__bullet',
+                '.job-details-jobs-unified-top-card__primary-description-without-tagline span',
+                '.tvm__text--low-emphasis'
+            ];
+
+            for (const selector of selectors) {
+                const location = document.querySelector(selector);
+                if (location && location.textContent.trim().length > 0) {
+                    const text = location.textContent.trim();
+                    // Check if it looks like a location (contains city, state, country)
+                    if (text.includes(',') || text.includes('Remote') || text.includes('Egypt') || text.includes('Cairo')) {
+                        return text;
+                    }
+                }
+            }
+            return null;
         }
 
         // Indeed
@@ -221,8 +278,23 @@ class JobDescriptionExtractor {
     extractJobDescription() {
         // LinkedIn
         if (window.location.hostname.includes('linkedin.com')) {
-            const description = document.querySelector('.jobs-description-content__text, .jobs-box__html-content, .jobs-description__content');
-            return description ? this.cleanText(description.textContent) : null;
+            // Try multiple selectors for LinkedIn job descriptions
+            const selectors = [
+                '#job-details',
+                '.jobs-description-content__text--stretch',
+                '.jobs-description-content__text',
+                '.jobs-box__html-content',
+                '.jobs-description__content',
+                '.jobs-description-content'
+            ];
+
+            for (const selector of selectors) {
+                const description = document.querySelector(selector);
+                if (description && description.textContent.trim().length > 100) {
+                    return this.cleanText(description.textContent);
+                }
+            }
+            return null;
         }
 
         // Indeed
